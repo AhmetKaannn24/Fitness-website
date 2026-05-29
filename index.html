@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FORGE | Elit Fitness Platformu</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- ============ AUTH OVERLAY ============ -->
+  <div id="auth-overlay" class="auth-overlay hidden">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <span class="brand-mark">F</span>
+        <span class="brand-text">FORGE<small>elit fitness</small></span>
+      </div>
+      <p class="auth-subtitle">Disiplin. Ölçüm. İlerleme.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" type="button">Giriş</button>
+        <button class="auth-tab" data-tab="register" type="button">Kayıt</button>
+      </div>
+
+      <div id="auth-message" class="auth-message hidden"></div>
+
+      <!-- LOGIN -->
+      <form id="login-form" class="auth-form" autocomplete="on">
+        <label class="field">
+          <span>E-posta veya kullanıcı adı</span>
+          <input name="identifier" type="text" autocomplete="username" required maxlength="256" />
+        </label>
+        <label class="field">
+          <span>Şifre</span>
+          <input name="password" type="password" autocomplete="current-password" required minlength="1" maxlength="128" />
+        </label>
+        <label class="auth-check">
+          <input type="checkbox" name="remember" checked />
+          <span>Beni hatırla</span>
+        </label>
+        <button type="submit" class="btn primary auth-submit">Giriş Yap</button>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="register-form" class="auth-form hidden" autocomplete="on">
+        <label class="field">
+          <span>Kullanıcı adı</span>
+          <input name="username" type="text" autocomplete="username" required minlength="3" maxlength="64" pattern="[a-zA-Z0-9_.\-]+" />
+        </label>
+        <label class="field">
+          <span>E-posta</span>
+          <input name="email" type="email" autocomplete="email" required maxlength="256" />
+        </label>
+        <label class="field">
+          <span>Görünen ad (opsiyonel)</span>
+          <input name="displayName" type="text" autocomplete="name" maxlength="128" />
+        </label>
+        <label class="field">
+          <span>Şifre (en az 8 karakter)</span>
+          <input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="128" />
+        </label>
+        <label class="auth-check">
+          <input type="checkbox" name="remember" checked />
+          <span>Beni hatırla</span>
+        </label>
+        <button type="submit" class="btn primary auth-submit">Hesap Oluştur</button>
+      </form>
+
+      <p class="auth-footnote">
+        Verilerin HTTPS üzerinden iletilir, şifreler sunucuda BCrypt ile hash'lenir.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div id="app-wrap" class="hidden">
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="#" data-route="dashboard">
+        <span class="brand-mark">F</span>
+        <span class="brand-text">FORGE<small>elit fitness</small></span>
+      </a>
+      <nav class="nav">
+        <a href="#" data-route="dashboard" class="nav-link active">Panel</a>
+        <a href="#" data-route="generator" class="nav-link nav-link-special">Plan Oluştur</a>
+        <a href="#" data-route="tools" class="nav-link">Araçlar</a>
+        <a href="#" data-route="program" class="nav-link">Program</a>
+        <a href="#" data-route="track" class="nav-link">Takip</a>
+        <a href="#" data-route="history" class="nav-link">Geçmiş</a>
+        <a href="#" data-route="admin" class="nav-link nav-link-admin hidden" id="nav-admin">Yönetim</a>
+      </nav>
+      <div id="user-chip" class="user-chip hidden">
+        <span class="user-chip-avatar">●</span>
+        <span id="user-chip-name">—</span>
+        <button id="logout-btn" class="user-chip-logout" title="Çıkış" type="button">Çıkış</button>
+      </div>
+      <button class="burger" id="burger" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container main">
+
+    <!-- DASHBOARD -->
+    <section class="route" data-view="dashboard">
+      <div class="hero">
+        <div class="hero-meta">elit fitness platformu</div>
+        <h1 class="hero-title">Disiplinin <em>ölçülebilir</em> hali.</h1>
+        <p class="hero-sub">Hesapla. Programla. Kaydet. İlerle. Her veri burada, senin kontrolünde kalır.</p>
+        <div class="hero-cta">
+          <button class="btn primary" data-route="tools">Araçları Aç</button>
+          <button class="btn ghost" data-route="track">Antrenmanı Başlat</button>
+        </div>
+      </div>
+
+      <!-- Aktif nutrition planı (varsa) -->
+      <div id="nutrition-target" class="nutrition-target hidden"></div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Toplam Antrenman</div>
+          <div class="stat-value" id="stat-sessions">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Toplam Set</div>
+          <div class="stat-value" id="stat-sets">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Toplam Hacim (kg)</div>
+          <div class="stat-value" id="stat-volume">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Kayıtlı Hareket</div>
+          <div class="stat-value" id="stat-exercises">0</div>
+        </div>
+      </div>
+
+      <div class="section-title"><span>Hızlı Erişim</span></div>
+      <div class="tool-grid" id="quick-tools"></div>
+    </section>
+
+    <!-- TOOLS -->
+    <section class="route hidden" data-view="tools">
+      <div class="page-head">
+        <h2>Hesaplama Araçları</h2>
+        <p>Tüm sonuçların otomatik kaydedilir. Geçmiş sekmesinden inceleyebilirsin.</p>
+      </div>
+      <div class="tool-grid" id="tool-grid"></div>
+
+      <!-- Tool detail panel -->
+      <div class="tool-panel hidden" id="tool-panel">
+        <button class="back-link" id="tool-back">&larr; Araçlara dön</button>
+        <div id="tool-content"></div>
+      </div>
+    </section>
+
+    <!-- PROGRAM -->
+    <section class="route hidden" data-view="program">
+      <div class="page-head">
+        <h2>Antrenman Programı</h2>
+        <p>Günleri ve her güne ait hareketleri oluştur. Bu hareketler takip ekranında set/tekrar/ağırlık girmen için sıralanır.</p>
+      </div>
+
+      <div class="program-toolbar">
+        <button class="btn primary" id="add-day-btn">+ Gün Ekle</button>
+        <button class="btn ghost" id="seed-program-btn">Örnek Program Yükle</button>
+        <button class="btn danger-ghost" id="clear-program-btn">Programı Temizle</button>
+      </div>
+
+      <div id="program-list" class="program-list"></div>
+    </section>
+
+    <!-- TRACK -->
+    <section class="route hidden" data-view="track">
+      <div class="page-head">
+        <h2>Ağırlık Takibi</h2>
+        <p>Programındaki bir günü seç. Her hareket için set, tekrar ve ağırlık girip kaydet.</p>
+      </div>
+
+      <div class="track-controls">
+        <label class="field">
+          <span>Antrenman Günü</span>
+          <select id="track-day"></select>
+        </label>
+        <label class="field">
+          <span>Tarih</span>
+          <input type="date" id="track-date" />
+        </label>
+        <button class="btn primary" id="start-session">Oturumu Başlat</button>
+      </div>
+
+      <div id="track-area" class="track-area"></div>
+    </section>
+
+    <!-- GENERATOR (Smart Program Generator wizard) -->
+    <section class="route hidden" data-view="generator">
+      <div class="page-head">
+        <h2>Akıllı Program Oluşturucu</h2>
+        <p>4 adımlık ankete cevap ver, sana özel antrenman + beslenme planı algoritmik olarak üretilsin.</p>
+      </div>
+
+      <div id="generator-stage" class="gen-stage"></div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="route hidden" data-view="history">
+      <div class="page-head">
+        <h2>Geçmiş Kayıtlar</h2>
+        <p>Tüm hesaplama sonuçların ve antrenman oturumların burada saklanır.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="sessions">Antrenman Oturumları</button>
+        <button class="tab" data-tab="calcs">Hesaplama Geçmişi</button>
+        <button class="tab" data-tab="progress">Hareket İlerlemesi</button>
+      </div>
+
+      <div class="tab-panel" data-panel="sessions">
+        <div id="sessions-list"></div>
+      </div>
+      <div class="tab-panel hidden" data-panel="calcs">
+        <div id="calcs-list"></div>
+      </div>
+      <div class="tab-panel hidden" data-panel="progress">
+        <label class="field" style="max-width:360px;">
+          <span>Hareket seç</span>
+          <select id="progress-ex"></select>
+        </label>
+        <div id="progress-view"></div>
+      </div>
+    </section>
+
+    <!-- ADMIN PANEL -->
+    <section class="route hidden" data-view="admin">
+      <div class="page-head">
+        <h2>Yönetim Paneli <span class="admin-badge">ADMIN</span></h2>
+        <p>Tüm kullanıcılar, kayıtlar, üretilen planlar ve sistem aktivite logları.</p>
+      </div>
+      <div id="admin-stage"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>FORGE &middot; verilerin yalnızca senin tarayıcında tutulur</span>
+      <button class="link-danger" id="wipe-all">Tüm verileri sıfırla</button>
+    </div>
+  </footer>
+  </div><!-- /#app-wrap -->
+
+  <!-- Modal -->
+  <div class="modal hidden" id="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modal-title">Başlık</h3>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-foot" id="modal-foot"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- API base URL — gerektiğinde değiştir -->
+  <script>window.FORGE_API_BASE = 'http://localhost:5080/api';</script>
+
+  <!-- Chart.js (CDN) — ilerleme grafiği için -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- auth.js: klasik script (window.forge.* global'ini kurar; modülden önce çalışır) -->
+  <script src="auth.js"></script>
+
+  <!-- app.js: ES modül giriş noktası (deferred — DOM hazır olduktan sonra çalışır) -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
